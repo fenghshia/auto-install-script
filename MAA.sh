@@ -10,16 +10,19 @@ export PATH
 #安装Aria2
 function install_aria2(){
 	#更新软件
-	#pacman -Syu
-	pacman -S curl
-	pacman -S epel-release
-	pacman -S aria2
-	#验证aria2是否安装成功，如果没有换rpm安装
-	if [ ! -f "/usr/bin/aria2c" ];then
-		wget -c http://soft.xiaoz.org/linux/aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
-		tar jxvf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
-		cd aria2-1.34.0-linux-gnu-64bit-build1
-		make install
-		cd ..
-	fi
+	#pacman -SYu
+	pacman -SY curl
+	pacman -SY aria2
+}
+#配置文件
+function dealconf(){
+	#创建目录和文件
+	mkdir -p /srv/MAA/
+	touch /srv/MAA/aria2.session
+	touch /srv/MAA/aria2.log
+	cp aria2.conf /srv/MAA/
+	cp upbt.sh /srv/MAA/
+	chmod +x /srv/MAA/upbt.sh
+	chmod +x ccaa
+	cp ccaa /usr/sbin
 }
