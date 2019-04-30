@@ -43,7 +43,7 @@ function setting(){
 		downpath='/srv/aria2download/'
 	fi
 
-	#执行替换操作
+	#执行替换操作 sed执行替换的用法:sed 's/要被取代的字串/新的字串/g'
 	mkdir -p ${downpath}
 	sed -i "s%dir=%dir=${downpath}%g" /srv/MAA/aria2.conf
 	sed -i "s/rpc-secret=/rpc-secret=${secret}/g" /srv/MAA/aria2.conf
