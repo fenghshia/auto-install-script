@@ -91,11 +91,11 @@ def generatescript(project, rules, zone, sshkey, account, disk_size):
         )
 
 if __name__ == "__main__":
-    project = "emerald-diagram-300803"
+    project = "emerald-diagram-xxxxxx"
     rules = "tcp:6000-7000,tcp:5050"
     zone = "asia-east1-a"
-    sshkey = "fenghshia:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDEHXZnPOizU6u/RzKKrt5v/P7a8CitTu3U/50h/JpX1jttlzd0PTqNpuSaJrzo8Kj32Tit2/80O1jXxPcmsvHG7ZsuOFrYRN16rgWTNWauAT9oHuFwq7xFEbAivcTYpIEEfAYfRjOEzLwDjEfHorempsWRMasjHiPeHfUlwAxeLdJsaV0bQdPtNhcm/MAFr80U8ynUovLICgAD3VBVRJxH5WWMJ8GVWSLBDuIdbovw5mNVXs7iurdFwY3qcy3nmbVfmBRyN4/YXNX55W2OtpWE16UeWTJmVeXNxHi5fnOB73nqFWnPlURkiHWTuH4BGHB0/8EWFHnf/X/Ai4OrpbQj6Uxxs1gaIh4f6fjc/I12HDMqL3K/VVg18HfGJYeEHhAY/jziMnRnAaTUkKo3xSoE6K7dNVm/NDVg1/MGhYNSvLqeROWlTENqVZE3RO0fojd1i08BHnBVRVDkPf3DxAkk8utUWqeXUVIxRs4K2TZ2Dc6KzUBJdpf4CLOdHZq6ee0= fenghshia"
-    account = "942059884479-compute@developer.gserviceaccount.com"
+    sshkey = "fenghshia:ssh-rsa xxxxxx= fenghshia"
+    account = "xxxxxx-compute@developer.gserviceaccount.com"
     disk_size = 10
 
     generatescript(project, rules, zone, sshkey, account, disk_size)
