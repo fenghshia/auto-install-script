@@ -1,2 +1,3 @@
-# Manjaro-Aria2-Caddy-AriaNG
-自动安装脚本
+# 描述
+1. 用于生成脚本
+2. 用于自动配置服务
