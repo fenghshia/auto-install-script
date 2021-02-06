@@ -1,3 +1,5 @@
+sudo apt update
+sudo apt -y upgrade
 echo "start install app..."
 sudo yum install -y openssl openssh-server
 # sudo vim /etc/ssh/sshd_config
