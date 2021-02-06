@@ -1,7 +1,8 @@
-sudo mkdir /opt/dataroot
+sudo apt update
+sudo apt -y upgrade
 
 # install nextcloud
-sudo apt install -y apache2 mariadb-server libapache2-mod-php7.4
+sudo apt install -y apache2 mariadb-server libapache2-mod-php7.4 unzip
 sudo apt install -y php7.4-gd php7.4-mysql php7.4-curl php7.4-mbstring php7.4-intl
 sudo apt install -y php7.4-gmp php7.4-bcmath php-imagick php7.4-xml php7.4-zip
 
@@ -13,7 +14,7 @@ sudo mysql -uroot -p -e "FLUSH PRIVILEGES;"
 
 sudo wget https://download.nextcloud.com/server/releases/nextcloud-20.0.7.zip
 sudo unzip nextcloud-20.0.7.zip
-sudo cp -r nextcloud /var/www
+cp -r nextcloud /var/www
 sudo rm -rf nextcloud-20.0.7.zip
 
 sudo touch /etc/apache2/sites-available/nextcloud.conf
@@ -37,12 +38,16 @@ sudo a2enmod dir
 sudo a2enmod mime
 sudo a2enmod setenvif
 
+sudo chmod -R 777 /opt
+sudo -u www-data mkdir /opt/dataroot
+
 cd /var/www/nextcloud/
 sudo chmod -R 777 /var/www/nextcloud
 sudo -u www-data php occ  maintenance:install --database "mysql" --database-name "nextcloud"  --database-user "fenghshia" --database-pass "89948632" --admin-user "fenghshia" --admin-pass "xuan89948632." --data-dir "/opt/dataroot"
-cd ~
+sed -i "s/0 => 'localhost',/0 => '*',/g" ./config/config.php
+cd /root
 
-service apache2 restart
+sudo service apache2 restart
 
 # install bbr
 sudo wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh
@@ -63,4 +68,3 @@ sudo rm -rf shadowsocks-all.sh
 sudo chmod 777 shadowsocks_r_qr.png
 sudo mv shadowsocks_r_qr.png /opt/dataroot/fenghshia/files
 
-sudo chmod -R 777 dataroot
