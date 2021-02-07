@@ -18,10 +18,12 @@ apt install -y php7.4-gd php7.4-mysql php7.4-curl php7.4-mbstring php7.4-intl
 apt install -y php7.4-gmp php7.4-bcmath php-imagick php7.4-xml php7.4-zip
 
 /etc/init.d/mysql start
-mysql -uroot -p -e "CREATE USER 'fenghshia'@'localhost' IDENTIFIED BY '89948632';"
-mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS nextcloud CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
-mysql -uroot -p -e "GRANT ALL PRIVILEGES ON nextcloud.* TO 'fenghshia'@'localhost';"
+mysql -uroot -p -e "update mysql.user set authentication_string=password('xuan') where user='root' and Host ='localhost';"
 mysql -uroot -p -e "FLUSH PRIVILEGES;"
+mysql -uroot -pxuan -e "CREATE USER 'fenghshia'@'localhost' IDENTIFIED BY '89948632';"
+mysql -uroot -pxuan -e "CREATE DATABASE IF NOT EXISTS nextcloud CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+mysql -uroot -pxuan -e "GRANT ALL PRIVILEGES ON nextcloud.* TO 'fenghshia'@'localhost';"
+mysql -uroot -pxuan -e "FLUSH PRIVILEGES;"
 
 wget https://download.nextcloud.com/server/releases/nextcloud-20.0.7.zip
 unzip nextcloud-20.0.7.zip
@@ -114,9 +116,10 @@ tar xzf wiki-js.tar.gz -C ./wiki
 cd ./wiki
 mv config.sample.yml config.yml
 
-mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS wikijs CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
-mysql -uroot -p -e "GRANT ALL PRIVILEGES ON wikijs.* TO 'fenghshia'@'localhost';"
-mysql -uroot -p -e "FLUSH PRIVILEGES;"
+mysql -uroot -pxuan -e "CREATE DATABASE IF NOT EXISTS wikijs CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+mysql -uroot -pxuan -e "GRANT ALL PRIVILEGES ON wikijs.* TO 'fenghshia'@'localhost';"
+mysql -uroot -pxuan -e "FLUSH PRIVILEGES;"
+mysql -uroot -pxuan < wikijs.sql
 
 sed -i "s/  type: postgres/  type: mysql/g" config.yml
 sed -i "s/  port: 5432/  port: 8100/g" config.yml
@@ -213,6 +216,11 @@ esac" > ./frpctl
 ./frpctl start
 
 # auto backup database
+touch sqlautobackup.cron
+sudo -u www-data touch /opt/dataroot/fenghshia/files/wikijs.sql
+echo "0 21 * * * mysqldump -uroot -pxuan wikijs > /opt/dataroot/fenghshia/files/wikijs.sql" > sqlautobackup.cron
+crontab sqlautobackup.cron
+# crontab -l # 查看配置结果
 
 # end
 echo "nextcloud: 80/nextcloud
