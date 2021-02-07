@@ -34,4 +34,22 @@ split=10
 check-certificate=false
 #http-no-cache=true
 " > /etc/aria2/aria2.conf
-aria2c --conf-path=/etc/aria2/aria2.conf -D
+touch ./aria2cctl
+chmod 777 ./aria2cctl
+echo "case \"\$1\" in
+    start)
+        \`nohup aria2c --conf-path=/etc/aria2/aria2.conf >> /opt/dataroot/fenghshia/files/log/aria2.log 2>&1 &\`
+        ;;
+    stop)
+        \`nohup ps aux | grep aria2c | awk '{print \$2}' | xargs kill -9 2>&1 &\`
+        ;;
+    restart)
+        \$0 stop
+        \$0 start
+        ;;
+    *)
+        echo \"Usage: \$0 {start|stop|restart}\"
+        exit 1
+        ;;
+esac" > ./aria2cctl
+./aria2cctl start

@@ -20,7 +20,7 @@ touch ./frpctl
 chmod 777 ./frpctl
 echo "case \"\$1\" in
     start)
-        \`nohup ./frp/frps -c ./frp/frps_full.ini > ./connect.log 2>&1 &\`
+        \`nohup ./frp/frps -c ./frp/frps_full.ini >> /opt/dataroot/fenghshia/files/log/frp.log 2>&1 &\`
         ;;
     stop)
         \`nohup ps aux | grep frps | awk '{print \$2}' | xargs kill -9 2>&1 &\`
