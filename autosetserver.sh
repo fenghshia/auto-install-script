@@ -45,6 +45,8 @@ cd /var/www/nextcloud/
 sudo chmod -R 777 /var/www/nextcloud
 sudo -u www-data php occ  maintenance:install --database "mysql" --database-name "nextcloud"  --database-user "fenghshia" --database-pass "89948632" --admin-user "fenghshia" --admin-pass "xuan89948632." --data-dir "/opt/dataroot"
 sed -i "s/0 => 'localhost',/0 => '*',/g" ./config/config.php
+sudo -u www-data mkdir /opt/dataroot/fenghshia/files/jupyter-space
+sudo -u www-data mkdir /opt/dataroot/fenghshia/files/log
 cd /root
 
 sudo service apache2 restart
@@ -67,4 +69,43 @@ sudo ./shadowsocks-all.sh
 sudo rm -rf shadowsocks-all.sh
 sudo chmod 777 shadowsocks_r_qr.png
 sudo mv shadowsocks_r_qr.png /opt/dataroot/fenghshia/files
+
+# install anaconda3
+sudo apt autoremove python3
+sudo wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
+sudo chmod 777 Anaconda3-2020.11-Linux-x86_64.sh
+sudo ./Anaconda3-2020.11-Linux-x86_64.sh -b -p /root/anaconda3
+cat /root/.bashrc > /root/.bashrc.backup
+echo "export PATH=\"/root/anaconda3/bin:\$PATH\"" >> /root/.bashrc
+source /root/.bashrc
+
+# install jupyterlab
+python -m pip install -U jupyterlab
+python -m jupyter lab --generate-config
+sudo sed -i "s/# c.ServerApp.allow_root = False/c.ServerApp.allow_root = True/g" /root/.jupyter/jupyter_lab_config.py
+sudo sed -i "s/# c.ServerApp.ip = 'localhost'/c.ServerApp.ip = '0.0.0.0'/g" /root/.jupyter/jupyter_lab_config.py
+sudo sed -i "s/# c.ServerApp.notebook_dir = ''/c.ServerApp.notebook_dir = '\/opt\/dataroot\/fenghshia\/files\/jupyter-space'/g" /root/.jupyter/jupyter_lab_config.py
+sudo sed -i "s/# c.ServerApp.password = ''/c.ServerApp.password = 'argon2:\$argon2id\$v=19\$m=10240,t=10,p=8\$6eH\/L5KzxhmNdoeu0LX+tg\$1EusUQznagovKffC\/xvWzg'/g" /root/.jupyter/jupyter_lab_config.py
+sudo sed -i "s/# c.ServerApp.port = 8888/c.ServerApp.port = 6888/g" /root/.jupyter/jupyter_lab_config.py
+sudo sed -i "s/# c.ServerApp.root_dir = ''/c.ServerApp.root_dir = '\/opt\/dataroot\/fenghshia\/files\/jupyter-space'/g" /root/.jupyter/jupyter_lab_config.py
+sudo touch jupyterctl
+sudo chmod 777 jupyterctl
+echo "case \"\$1\" in
+    start)
+        \`nohup python -m jupyterlab --allow-root >> /opt/dataroot/fenghshia/files/log/jupyter.log 2>&1 &\`
+        ;;
+    stop)
+        \`nohup ps aux | grep jupyterlab | awk '{print \$2}' | xargs kill -9 2>&1 &\`
+        ;;
+    restart)
+        \$0 stop
+        \$0 start
+        ;;
+    *)
+        echo \"Usage: \$0 {start|stop|restart}\"
+        exit 1
+        ;;
+esac" > jupyterctl
+sudo -u www-data touch /opt/dataroot/fenghshia/files/log/jupyter.log
+jupyterctl start
 
