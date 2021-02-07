@@ -79,7 +79,7 @@ sed -i "s/# c.NotebookApp.allow_origin = ''/c.NotebookApp.allow_origin = '*'/g" 
 sed -i "s/# c.NotebookApp.allow_root = False/c.NotebookApp.allow_root = True/g" /root/.jupyter/jupyter_notebook_config.py
 sed -i "s/# c.NotebookApp.ip = 'localhost'/c.NotebookApp.ip = '0.0.0.0'/g" /root/.jupyter/jupyter_notebook_config.py
 sed -i "s/# c.NotebookApp.open_browser = True/c.NotebookApp.open_browser = False/g" /root/.jupyter/jupyter_notebook_config.py
-sed -i "s/# c.NotebookApp.port = 8888/c.NotebookApp.port = 6888/g" /root/.jupyter/jupyter_notebook_config.py
+sed -i "s/# c.NotebookApp.port = 8888/c.NotebookApp.port = 8000/g" /root/.jupyter/jupyter_notebook_config.py
 sed -i "s/# c.NotebookApp.notebook_dir = ''/c.NotebookApp.notebook_dir = '\/opt\/dataroot\/fenghshia\/files\/jupyter-space'/g" /root/.jupyter/jupyter_notebook_config.py
 # from notebook.auth import passwd; passwd()
 sed -i "s/# c.NotebookApp.password = ''/c.NotebookApp.password = 'argon2:\$argon2id\$v=19\$m=10240,t=10,p=8\$uvElaY9qR78b86aAgVldgA\$gaZzeZ8fZzIYg6BiShCvag'/g" /root/.jupyter/jupyter_notebook_config.py
@@ -119,7 +119,7 @@ mysql -uroot -p -e "GRANT ALL PRIVILEGES ON wikijs.* TO 'fenghshia'@'localhost';
 mysql -uroot -p -e "FLUSH PRIVILEGES;"
 
 sed -i "s/  type: postgres/  type: mysql/g" config.yml
-sed -i "s/  port: 5432/  port: 3306/g" config.yml
+sed -i "s/  port: 5432/  port: 8100/g" config.yml
 sed -i "s/  user: wikijs/  user: fenghshia/g" config.yml
 sed -i "s/  pass: wikijsrocks/  pass: 89948632/g" config.yml
 sed -i "s/  db: wiki/  db: wikijs/g" config.yml
@@ -171,5 +171,53 @@ echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://
 echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing candidate" | sudo tee /etc/apt/sources.list.d/syncthing.list
 printf "Package: *\nPin: origin apt.syncthing.net\nPin-Priority: 990\n" | sudo tee /etc/apt/preferences.d/syncthing
 apt-get install -y apt-transport-https syncthing
+syncthing -gui-address=0.0.0.0:8300
+
+# install frp
+wget https://github.com/fatedier/frp/releases/download/v0.20.0/frp_0.20.0_linux_amd64.tar.gz
+tar -xvmzf frp_0.20.0_linux_amd64.tar.gz
+rm -rf frp_0.20.0_linux_amd64.tar.gz
+mv frp_0.20.0_linux_amd64 frp
+sed -i "s/bind_port = 7000/bind_port = 8400/g" ./frp/frps_full.ini
+sed -i "s/kcp_bind_port = 7000/kcp_bind_port = 8400/g" ./frp/frps_full.ini
+sed -i "s/bind_udp_port = 7001/kcp_bind_port = 8410/g" ./frp/frps_full.ini
+sed -i "s/vhost_http_port = 80/vhost_http_port = 8480/g" ./frp/frps_full.ini
+sed -i "s/vhost_https_port = 443/vhost_https_port = 8443/g" ./frp/frps_full.ini
+sed -i "s/dashboard_port = 7500/dashboard_port = 8450/g" ./frp/frps_full.ini
+sed -i "s/dashboard_user = admin/dashboard_user = fenghshia/g" ./frp/frps_full.ini
+sed -i "s/dashboard_pwd = admin/dashboard_pwd = xuan89948632./g" ./frp/frps_full.ini
+sed -i "s/log_file = ./frps.log/log_file = /opt/dataroot/fenghshia/files/log/frps.log/g" ./frp/frps_full.ini
+touch /opt/dataroot/fenghshia/files/log/frps.log
+sed -i "s/token = 12345678/token = xuan89948632./g" ./frp/frps_full.ini
+sed -i "s/allow_ports = 2000-3000,3001,3003,4000-50000/allow_ports = 6000-7000/g" ./frp/frps_full.ini
+
+echo "set frpctl"
+touch ./frpctl
+chmod 777 ./frpctl
+echo "case \"\$1\" in
+    start)
+        \`nohup ./frps -c ./frps_full.ini > ./connect.log 2>&1 &\`
+        ;;
+    stop)
+        \`nohup ps aux | grep frps | awk '{print \$2}' | xargs kill -9 2>&1 &\`
+        ;;
+    restart)
+        \$0 stop
+        \$0 start
+        ;;
+    *)
+        echo \"Usage: \$0 {start|stop|restart}\"
+        exit 1
+        ;;
+esac" > ./frpctl
+./frpctl start
 
 # auto backup database
+
+# end
+echo "nextcloud: 80/nextcloud
+jupyterlab: 8000/
+wiki.js: 8100/
+shadowsocksr: 8200/
+syncthing: 8300/
+frp: 8400/"
