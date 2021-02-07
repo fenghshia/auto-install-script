@@ -2,68 +2,28 @@ apt update
 apt -y upgrade
 
 # install ssh
-echo "start install app..."
-sudo yum install -y openssl openssh-server
-# sudo vim /etc/ssh/sshd_config
-echo "start config ssh..."
-sudo sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
-sudo sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config
-echo "restart sshd..."
-sudo systemctl restart sshd
-echo "sshd install complete"
+rm -rf ssh.sh
+wget https://github.com/fenghshia/auto-install-script/releases/download/v.0.1.ssh/ssh.sh
+sed -i 's/\r//' ssh.sh
+chmod +x ssh.sh
+./ssh.sh
+rm -rf ssh.sh
+
+# install mariadb
+rm -rf mariadb.sh
+wget https://github.com/fenghshia/auto-install-script/releases/download/v.0.1.mariadb/mariadb.sh
+sed -i 's/\r//' mariadb.sh
+chmod +x mariadb.sh
+./mariadb.sh
+rm -rf mariadb.sh
 
 # install nextcloud
-apt install -y apache2 mariadb-server libapache2-mod-php7.4 unzip
-apt install -y php7.4-gd php7.4-mysql php7.4-curl php7.4-mbstring php7.4-intl
-apt install -y php7.4-gmp php7.4-bcmath php-imagick php7.4-xml php7.4-zip
-
-/etc/init.d/mysql start
-mysql -uroot -p -e "update mysql.user set authentication_string=password('xuan') where user='root' and Host ='localhost';"
-mysql -uroot -p -e "FLUSH PRIVILEGES;"
-mysql -uroot -pxuan -e "CREATE USER 'fenghshia'@'localhost' IDENTIFIED BY '89948632';"
-mysql -uroot -pxuan -e "CREATE DATABASE IF NOT EXISTS nextcloud CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
-mysql -uroot -pxuan -e "GRANT ALL PRIVILEGES ON nextcloud.* TO 'fenghshia'@'localhost';"
-mysql -uroot -pxuan -e "FLUSH PRIVILEGES;"
-
-wget https://download.nextcloud.com/server/releases/nextcloud-20.0.7.zip
-unzip nextcloud-20.0.7.zip
-cp -r nextcloud /var/www
-rm -rf nextcloud-20.0.7.zip
-
-touch /etc/apache2/sites-available/nextcloud.conf
-echo "Alias /nextcloud \"/var/www/nextcloud/\"
-<Directory /var/www/nextcloud/>
-    Require all granted
-    AllowOverride All
-    Options FollowSymLinks MultiViews
-			
-    <IfModule mod_dav.c>
-        Dav off
-    </IfModule>
-</Directory>
-" > /etc/apache2/sites-available/nextcloud.conf
-
-a2ensite nextcloud.conf
-a2enmod rewrite
-a2enmod headers
-a2enmod env
-a2enmod dir
-a2enmod mime
-a2enmod setenvif
-
-chmod -R 777 /opt
-sudo -u www-data mkdir /opt/dataroot
-
-cd /var/www/nextcloud/
-chmod -R 777 /var/www/nextcloud
-sudo -u www-data php occ  maintenance:install --database "mysql" --database-name "nextcloud"  --database-user "fenghshia" --database-pass "89948632" --admin-user "fenghshia" --admin-pass "xuan89948632." --data-dir "/opt/dataroot"
-sed -i "s/0 => 'localhost',/0 => '*',/g" ./config/config.php
-sudo -u www-data mkdir /opt/dataroot/fenghshia/files/jupyter-space
-sudo -u www-data mkdir /opt/dataroot/fenghshia/files/wiki-space
-sudo -u www-data mkdir /opt/dataroot/fenghshia/files/log
-cd /root
-
-service apache2 restart
+rm -rf nextcloud.sh
+wget https://github.com/fenghshia/auto-install-script/releases/download/v.0.1.nextcloud/nextcloud.sh
+sed -i 's/\r//' nextcloud.sh
+chmod +x nextcloud.sh
+./nextcloud.sh
+rm -rf nextcloud.sh
 
 # install anaconda3
 apt autoremove -y python3
@@ -72,7 +32,7 @@ chmod 777 Anaconda3-2020.11-Linux-x86_64.sh
 ./Anaconda3-2020.11-Linux-x86_64.sh -b -p /root/anaconda3
 cat /root/.bashrc > /root/.bashrc.backup
 echo "export PATH=\"/root/anaconda3/bin:\$PATH\"" >> /root/.bashrc
-source /root/.bashrc
+source ~/.bashrc
 
 # install jupyterlab
 python -m pip install -U jupyterlab
@@ -199,7 +159,7 @@ touch ./frpctl
 chmod 777 ./frpctl
 echo "case \"\$1\" in
     start)
-        \`nohup ./frps -c ./frps_full.ini > ./connect.log 2>&1 &\`
+        \`nohup ./frp/frps -c ./frp/frps_full.ini > ./connect.log 2>&1 &\`
         ;;
     stop)
         \`nohup ps aux | grep frps | awk '{print \$2}' | xargs kill -9 2>&1 &\`
@@ -215,6 +175,45 @@ echo "case \"\$1\" in
 esac" > ./frpctl
 ./frpctl start
 
+# install aria2
+apt-get install -y aria2
+mkdir /etc/aria2
+touch /etc/aria2/aria2.session
+chmod 777 /etc/aria2/aria2.session
+touch /etc/aria2/aria2.conf
+echo "dir=/opt/dataroot/fenghshia/files/downloads
+disable-ipv6=true
+
+#打开rpc的目的是为了给web管理端用
+enable-rpc=true
+rpc-allow-origin-all=true
+rpc-listen-all=true
+rpc-listen-port=8500
+#断点续传
+continue=true
+input-file=/etc/aria2/aria2.session
+save-session=/etc/aria2/aria2.session
+
+#最大同时下载任务数
+max-concurrent-downloads=20
+save-session-interval=120
+
+# Http/FTP 相关
+connect-timeout=120
+#lowest-speed-limit=10K
+#同服务器连接数
+max-connection-per-server=10
+#max-file-not-found=2
+#最小文件分片大小, 下载线程数上限取决于能分出多少片, 对于小文件重要
+min-split-size=10M
+
+#单文件最大线程数, 路由建议值: 5
+split=10
+check-certificate=false
+#http-no-cache=true
+" > /etc/aria2/aria2.conf
+aria2c --conf-path=/etc/aria2/aria2.conf -D
+
 # auto backup database
 touch sqlautobackup.cron
 sudo -u www-data touch /opt/dataroot/fenghshia/files/wikijs.sql
@@ -228,4 +227,5 @@ jupyterlab: 8000/
 wiki.js: 8100/
 shadowsocksr: 8200/
 syncthing: 8300/
-frp: 8400/"
+frp: 8400/
+aria2: 8500/"
