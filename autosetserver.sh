@@ -1,6 +1,17 @@
 apt update
 apt -y upgrade
 
+# install ssh
+echo "start install app..."
+sudo yum install -y openssl openssh-server
+# sudo vim /etc/ssh/sshd_config
+echo "start config ssh..."
+sudo sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
+sudo sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config
+echo "restart sshd..."
+sudo systemctl restart sshd
+echo "sshd install complete"
+
 # install nextcloud
 apt install -y apache2 mariadb-server libapache2-mod-php7.4 unzip
 apt install -y php7.4-gd php7.4-mysql php7.4-curl php7.4-mbstring php7.4-intl
@@ -46,6 +57,7 @@ chmod -R 777 /var/www/nextcloud
 sudo -u www-data php occ  maintenance:install --database "mysql" --database-name "nextcloud"  --database-user "fenghshia" --database-pass "89948632" --admin-user "fenghshia" --admin-pass "xuan89948632." --data-dir "/opt/dataroot"
 sed -i "s/0 => 'localhost',/0 => '*',/g" ./config/config.php
 sudo -u www-data mkdir /opt/dataroot/fenghshia/files/jupyter-space
+sudo -u www-data mkdir /opt/dataroot/fenghshia/files/wiki-space
 sudo -u www-data mkdir /opt/dataroot/fenghshia/files/log
 cd /root
 
@@ -94,6 +106,45 @@ esac" > jupyterctl
 sudo -u www-data touch /opt/dataroot/fenghshia/files/log/jupyter.log
 ./jupyterctl start
 
+# install wiki.js
+apt install -y npm
+wget https://github.com/Requarks/wiki/releases/download/2.5.170/wiki-js.tar.gz
+mkdir wiki
+tar xzf wiki-js.tar.gz -C ./wiki
+cd ./wiki
+mv config.sample.yml config.yml
+
+mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS wikijs CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+mysql -uroot -p -e "GRANT ALL PRIVILEGES ON wikijs.* TO 'fenghshia'@'localhost';"
+mysql -uroot -p -e "FLUSH PRIVILEGES;"
+
+sed -i "s/  type: postgres/  type: mysql/g" config.yml
+sed -i "s/  port: 5432/  port: 3306/g" config.yml
+sed -i "s/  user: wikijs/  user: fenghshia/g" config.yml
+sed -i "s/  pass: wikijsrocks/  pass: 89948632/g" config.yml
+sed -i "s/  db: wiki/  db: wikijs/g" config.yml
+sed -i "s/dataPath: .\/data/dataPath: \/opt\/dataroot\/fenghshia\/files\/wiki-space/g" config.yml
+
+touch /etc/systemd/system/wiki.service
+echo "[Unit]
+Description=Wiki.js
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node server
+Restart=always
+# Consider creating a dedicated user for Wiki.js here:
+User=root
+Environment=NODE_ENV=production
+WorkingDirectory=/root/wiki
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/wiki.service
+systemctl daemon-reload
+systemctl start wiki
+systemctl enable wiki
+
 # install bbr
 wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh
 chmod 777 bbr.sh
@@ -114,3 +165,11 @@ rm -rf shadowsocks-all.sh
 chmod 777 shadowsocks_r_qr.png
 mv shadowsocks_r_qr.png /opt/dataroot/fenghshia/files
 
+# install syncthing
+curl -s -o /usr/share/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
+echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing candidate" | sudo tee /etc/apt/sources.list.d/syncthing.list
+printf "Package: *\nPin: origin apt.syncthing.net\nPin-Priority: 990\n" | sudo tee /etc/apt/preferences.d/syncthing
+apt-get install -y apt-transport-https syncthing
+
+# auto backup database
