@@ -51,25 +51,6 @@ cd /root
 
 sudo service apache2 restart
 
-# install bbr
-sudo wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh
-sudo chmod 777 bbr.sh
-sudo ./bbr.sh
-sudo rm -rf bbr.sh
-# echo "是否重启系统: 1. 重启 2.不重启"
-# read -p "Enter your name age id_card address:" n
-# case $n in
-# (1)
-#     reboot
-# esac
-# install ssr
-sudo wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
-sudo chmod 777 shadowsocks-all.sh
-sudo ./shadowsocks-all.sh
-sudo rm -rf shadowsocks-all.sh
-sudo chmod 777 shadowsocks_r_qr.png
-sudo mv shadowsocks_r_qr.png /opt/dataroot/fenghshia/files
-
 # install anaconda3
 sudo apt autoremove python3
 sudo wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
@@ -107,5 +88,25 @@ echo "case \"\$1\" in
         ;;
 esac" > jupyterctl
 sudo -u www-data touch /opt/dataroot/fenghshia/files/log/jupyter.log
-jupyterctl start
+./jupyterctl start
+
+# install bbr
+sudo wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh
+sudo chmod 777 bbr.sh
+sudo ./bbr.sh
+sudo rm -rf bbr.sh
+# echo "是否重启系统: 1. 重启 2.不重启"
+# read -p "Enter your name age id_card address:" n
+# case $n in
+# (1)
+#     reboot
+# esac
+
+# install ssr
+sudo wget --no-check-certificate -O shadowsocks-all.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks-all.sh
+sudo chmod 777 shadowsocks-all.sh
+sudo ./shadowsocks-all.sh
+sudo rm -rf shadowsocks-all.sh
+sudo chmod 777 shadowsocks_r_qr.png
+sudo mv shadowsocks_r_qr.png /opt/dataroot/fenghshia/files
 
