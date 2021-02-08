@@ -4,7 +4,7 @@ echo "deb [signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://
 printf "Package: *\nPin: origin apt.syncthing.net\nPin-Priority: 990\n" | sudo tee /etc/apt/preferences.d/syncthing
 apt-get install -y apt-transport-https syncthing
 touch ./syncthingctl
-chmod 777 ./syncthingctl
+chmod +x ./syncthingctl
 echo "case \"\$1\" in
     start)
         \`nohup syncthing -gui-address=0.0.0.0:8300 >> /opt/dataroot/fenghshia/files/log/syncthing.log 2>&1 &\`

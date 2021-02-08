@@ -11,7 +11,6 @@ sed -i "s/dashboard_port = 7500/dashboard_port = 8450/g" ./frp/frps_full.ini
 sed -i "s/dashboard_user = admin/dashboard_user = fenghshia/g" ./frp/frps_full.ini
 sed -i "s/dashboard_pwd = admin/dashboard_pwd = xuan89948632./g" ./frp/frps_full.ini
 sed -i "s/log_file = ./frps.log/log_file = /opt/dataroot/fenghshia/files/log/frps.log/g" ./frp/frps_full.ini
-touch /opt/dataroot/fenghshia/files/log/frps.log
 sed -i "s/token = 12345678/token = xuan89948632./g" ./frp/frps_full.ini
 sed -i "s/allow_ports = 2000-3000,3001,3003,4000-50000/allow_ports = 6000-7000/g" ./frp/frps_full.ini
 
@@ -20,7 +19,7 @@ touch ./frpctl
 chmod 777 ./frpctl
 echo "case \"\$1\" in
     start)
-        \`nohup ./frp/frps -c ./frp/frps_full.ini >> /opt/dataroot/fenghshia/files/log/frp.log 2>&1 &\`
+        \`nohup ./frp/frps -c ./frp/frps_full.ini >> /dev/null 2>&1 &\`
         ;;
     stop)
         \`nohup ps aux | grep frps | awk '{print \$2}' | xargs kill -9 2>&1 &\`

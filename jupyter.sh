@@ -28,5 +28,4 @@ echo "case \"\$1\" in
         exit 1
         ;;
 esac" > jupyterctl
-sudo -u www-data touch /opt/dataroot/fenghshia/files/log/jupyter.log
 ./jupyterctl start

@@ -10,8 +10,9 @@ mysql -uroot -pxuan -e "GRANT ALL PRIVILEGES ON wikijs.* TO 'fenghshia'@'localho
 mysql -uroot -pxuan -e "FLUSH PRIVILEGES;"
 mysql -uroot -pxuan < wikijs.sql
 
+sed -i "s/port: 3000/port: 8100/g" config.yml
 sed -i "s/  type: postgres/  type: mysql/g" config.yml
-sed -i "s/  port: 5432/  port: 8100/g" config.yml
+sed -i "s/  port: 5432/  port: 3306/g" config.yml
 sed -i "s/  user: wikijs/  user: fenghshia/g" config.yml
 sed -i "s/  pass: wikijsrocks/  pass: 89948632/g" config.yml
 sed -i "s/  db: wiki/  db: wikijs/g" config.yml
@@ -36,3 +37,10 @@ WantedBy=multi-user.target" > /etc/systemd/system/wiki.service
 systemctl daemon-reload
 systemctl start wiki
 systemctl enable wiki
+
+# auto backup database
+touch sqlautobackup.cron
+sudo -u www-data touch /opt/dataroot/fenghshia/files/wikijs.sql
+echo "0 21 * * * mysqldump -uroot -pxuan wikijs > /opt/dataroot/fenghshia/files/wikijs.sql" > sqlautobackup.cron
+crontab sqlautobackup.cron
+# crontab -l # 查看配置结果
