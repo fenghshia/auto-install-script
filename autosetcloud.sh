@@ -42,6 +42,7 @@ runscript "0.1" "aria2"
 # setup cron
 runscript "0.1" "cron"
 
+
 # end
 echo "---------------------------------------------
 nextcloud:       80/nextcloud
@@ -55,4 +56,14 @@ gitlab:          8200/
 frp:             8300/
 ---------------------------------------------
 aria2:           8400/
----------------------------------------------"
+---------------------------------------------
+恢复gitlab数据的命令:
+wget https://github.com/fenghshia/auto-install-script/releases/download/v.0.1.gitlab/1466811825_gitlab_backup.tar
+gitlab-ctl stop
+gitlab-rake gitlab:backup:restore BACKUP=1466811825
+gitlab-ctl start" > /opt/dataroot/fenghshia/files/SystemInitInfo.txt
+cat /opt/dataroot/fenghshia/files/SystemInitInfo.txt
+# flash
+cd /var/www/nextcloud;
+sudo -u www-data php occ files:scan --all;
+cd ~
