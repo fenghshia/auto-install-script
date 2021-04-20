@@ -9,12 +9,12 @@ runscript(){
     ./$2.sh
     rm -rf $2.sh
 }
-
+# 需要人工介入的放置在最前面
 # install mariadb
 runscript "0.1" "mariadb"
 
-# install ssh
-runscript "0.1" "ssh"
+# install gitlab
+runscript "0.1" "gitlab"
 
 # install nextcloud
 runscript "0.1" "nextcloud"
@@ -33,20 +33,14 @@ sed -i 's/\r//' wiki.js.sh;
 ./wiki.js.sh;
 rm -rf wiki.js.sh;
 
-# install syncthing
-runscript "0.1" "syncthing"
-
 # install frp
 runscript "0.1" "frp"
 
 # install aria2
 runscript "0.1" "aria2"
 
-# install bbr
-runscript "0.1" "bbr"
-
-# install ssr
-runscript "0.1" "ssr"
+# setup cron
+runscript "0.1" "cron"
 
 # end
 echo "---------------------------------------------
@@ -56,11 +50,9 @@ jupyterlab:      8000/
 ---------------------------------------------
 wiki.js:         8100/
 ---------------------------------------------
-shadowsocksr:    8200/
+gitlab:          8200/
 ---------------------------------------------
-syncthing:       8300/
+frp:             8300/
 ---------------------------------------------
-frp:             8400/
----------------------------------------------
-aria2:           8500/
+aria2:           8400/
 ---------------------------------------------"
